@@ -1,0 +1,6 @@
+@BackCaf_HostAddress = http://localhost:5017
+
+GET {{BackCaf_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
