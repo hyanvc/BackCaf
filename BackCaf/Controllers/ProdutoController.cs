@@ -42,6 +42,14 @@ namespace BackCaf.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id}/status")]
+        public IActionResult AtualizarStatus(int id, [FromBody] AtualizarStatusRequest req)
+        {
+            if (!_bo.AtualizarStatus(id, req.Status))
+                return NotFound();
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -57,5 +65,10 @@ namespace BackCaf.Controllers
         public bool Canela { get; set; }
         public bool SemAcucar { get; set; }
         public string Usuario { get; set; } // Novo campo
+    }
+
+    public class AtualizarStatusRequest
+    {
+        public string Status { get; set; }
     }
 }

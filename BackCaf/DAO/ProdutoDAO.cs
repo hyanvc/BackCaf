@@ -77,5 +77,24 @@ namespace BackCaf.DAO
             File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario};{p.Status}"));
             return true;
         }
+
+        public bool AtualizarStatus(int id, string novoStatus)
+        {
+            var produtos = Listar().ToList();
+            var index = produtos.FindIndex(p => p.Id == id);
+            if (index == -1) return false;
+
+            var produto = produtos[index];
+            produtos[index] = (produto.Id, produto.Descricao, produto.Preco, produto.Usuario, novoStatus);
+            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario};{p.Status}"));
+            return true;
+        }
+
+        public void RemoverTodosDoUsuario(string usuario)
+        {
+            var produtos = Listar().ToList();
+            produtos.RemoveAll(p => p.Usuario.Equals(usuario, StringComparison.OrdinalIgnoreCase));
+            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario};{p.Status}"));
+        }
     }
 }
