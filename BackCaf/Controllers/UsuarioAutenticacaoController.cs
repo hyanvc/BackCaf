@@ -13,6 +13,14 @@ namespace SuaApi.Controllers
         {
             public string Usuario { get; set; }
             public string Senha { get; set; }
+            // Removido IsUser do login
+        }
+
+        public class UsuarioCadastro
+        {
+            public string Usuario { get; set; }
+            public string Senha { get; set; }
+            public bool IsUser { get; set; }
         }
 
         private readonly string _caminhoArquivo;
@@ -39,15 +47,21 @@ namespace SuaApi.Controllers
             foreach (var linha in linhas)
             {
                 var partes = linha.Split(';');
-                if (partes.Length == 2 && login.Usuario == partes[0] && login.Senha == partes[1])
-                    return Ok("Autenticação bem-sucedida.");
+                if (partes.Length == 3 && login.Usuario == partes[0] && login.Senha == partes[1])
+                {
+                    bool isUser = bool.TryParse(partes[2], out var val) && val;
+                    if (isUser)
+                        return Ok(1); // tela usuario
+                    else
+                        return Ok(2); // tela cozinha
+                }
             }
 
             return Unauthorized("Usuário ou senha inválidos.");
         }
 
         [HttpPost("cadastrar")]
-        public IActionResult Cadastrar([FromBody] UsuarioLogin novoUsuario)
+        public IActionResult Cadastrar([FromBody] UsuarioCadastro novoUsuario)
         {
             if (string.IsNullOrWhiteSpace(novoUsuario.Usuario) || string.IsNullOrWhiteSpace(novoUsuario.Senha))
                 return BadRequest("Usuário e senha são obrigatórios.");
@@ -59,7 +73,7 @@ namespace SuaApi.Controllers
 
             using (var writer = System.IO.File.AppendText(_caminhoArquivo))
             {
-                writer.WriteLine($"{novoUsuario.Usuario};{novoUsuario.Senha}");
+                writer.WriteLine($"{novoUsuario.Usuario};{novoUsuario.Senha};{novoUsuario.IsUser}");
             }
 
             return Ok("Usuário cadastrado com sucesso.");

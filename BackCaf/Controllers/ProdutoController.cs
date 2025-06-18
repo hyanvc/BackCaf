@@ -29,7 +29,7 @@ namespace BackCaf.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] ProdutoRequest req)
         {
-            var produto = _bo.Criar(req.Tipo, req.LeiteDeAveia, req.Canela, req.SemAcucar);
+            var produto = _bo.Criar(req.Tipo, req.LeiteDeAveia, req.Canela, req.SemAcucar, req.Usuario);
             var idproduto = produto.Item1;
             return Ok(idproduto);
         }
@@ -56,5 +56,6 @@ namespace BackCaf.Controllers
         public bool LeiteDeAveia { get; set; }
         public bool Canela { get; set; }
         public bool SemAcucar { get; set; }
+        public string Usuario { get; set; } // Novo campo
     }
 }

@@ -19,27 +19,27 @@ namespace BackCaf.DAO
                 File.Create(_caminhoArquivo).Close();
         }
 
-        public IEnumerable<(int Id, string Descricao, decimal Preco)> Listar()
+        public IEnumerable<(int Id, string Descricao, decimal Preco, string Usuario)> Listar()
         {
             var linhas = File.ReadAllLines(_caminhoArquivo);
             foreach (var linha in linhas)
             {
                 var partes = linha.Split(';');
-                if (partes.Length == 3 &&
+                if (partes.Length == 4 &&
                     int.TryParse(partes[0], out int id) &&
                     decimal.TryParse(partes[2], out decimal preco))
                 {
-                    yield return (id, partes[1], preco);
+                    yield return (id, partes[1], preco, partes[3]);
                 }
             }
         }
 
-        public (int, string, decimal)? Obter(int id)
+        public (int, string, decimal, string)? Obter(int id)
         {
             return Listar().FirstOrDefault(p => p.Id == id);
         }
 
-        public (int, string, decimal) Adicionar(Bebida bebida)
+        public (int, string, decimal, string) Adicionar(Bebida bebida, string usuario)
         {
             int novoId = 1;
             var produtos = Listar().ToList();
@@ -48,9 +48,9 @@ namespace BackCaf.DAO
 
             using (var writer = File.AppendText(_caminhoArquivo))
             {
-                writer.WriteLine($"{novoId};{bebida.Descricao};{bebida.Preco}");
+                writer.WriteLine($"{novoId};{bebida.Descricao};{bebida.Preco};{usuario}");
             }
-            return (novoId, bebida.Descricao, bebida.Preco);
+            return (novoId, bebida.Descricao, bebida.Preco, usuario);
         }
 
         public bool Remover(int id)
@@ -60,7 +60,7 @@ namespace BackCaf.DAO
             if (produto == default) return false;
 
             produtos.Remove(produto);
-            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco}"));
+            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario}"));
             return true;
         }
 
@@ -70,8 +70,9 @@ namespace BackCaf.DAO
             var index = produtos.FindIndex(p => p.Id == id);
             if (index == -1) return false;
 
-            produtos[index] = (id, bebida.Descricao, bebida.Preco);
-            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco}"));
+            var usuario = produtos[index].Usuario;
+            produtos[index] = (id, bebida.Descricao, bebida.Preco, usuario);
+            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario}"));
             return true;
         }
     }

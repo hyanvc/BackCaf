@@ -17,7 +17,8 @@ namespace BackCaf.BO
             {
                 Id = p.Id,
                 Descricao = p.Descricao,
-                Preco = p.Preco
+                Preco = p.Preco,
+                Usuario = p.Usuario
             });
         }
 
@@ -34,14 +35,13 @@ namespace BackCaf.BO
             };
         }
 
-        public (int, string, decimal) Criar(string tipo, bool leiteDeAveia, bool canela, bool semAcucar)
+        public (int, string, decimal,string) Criar(string tipo, bool leiteDeAveia, bool canela, bool semAcucar, string usuario)
         {
             Bebida bebida = BebidaFactory.Criar(tipo);
             if (leiteDeAveia) bebida = new LeiteDeAveia(bebida);
             if (canela) bebida = new Canela(bebida);
             if (semAcucar) bebida = new SemAcucar(bebida);
-        
-            return _dao.Adicionar(bebida);
+            return _dao.Adicionar(bebida, usuario);
         }
 
         public bool Atualizar(int id, string tipo, bool leiteDeAveia, bool canela, bool semAcucar)
