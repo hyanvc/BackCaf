@@ -6,5 +6,6 @@ namespace BackCaf.Models
         public string Descricao { get; set; }
         public decimal Preco { get; set; }
         public string Usuario { get; set; }
+        public string Status { get; set; } // Novo campo
     }
 }

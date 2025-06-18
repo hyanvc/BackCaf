@@ -18,7 +18,8 @@ namespace BackCaf.BO
                 Id = p.Id,
                 Descricao = p.Descricao,
                 Preco = p.Preco,
-                Usuario = p.Usuario
+                Usuario = p.Usuario,
+                Status = p.Status
             });
         }
 
@@ -31,11 +32,13 @@ namespace BackCaf.BO
             {
                 Id = p.Value.Item1,
                 Descricao = p.Value.Item2,
-                Preco = p.Value.Item3
+                Preco = p.Value.Item3,
+                Usuario = p.Value.Item4,
+                Status = p.Value.Item5
             };
         }
 
-        public (int, string, decimal,string) Criar(string tipo, bool leiteDeAveia, bool canela, bool semAcucar, string usuario)
+        public (int, string, decimal, string, string) Criar(string tipo, bool leiteDeAveia, bool canela, bool semAcucar, string usuario)
         {
             Bebida bebida = BebidaFactory.Criar(tipo);
             if (leiteDeAveia) bebida = new LeiteDeAveia(bebida);

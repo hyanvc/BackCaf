@@ -17,40 +17,41 @@ namespace BackCaf.DAO
 
             if (!File.Exists(_caminhoArquivo))
                 File.Create(_caminhoArquivo).Close();
-        }
+        }   
 
-        public IEnumerable<(int Id, string Descricao, decimal Preco, string Usuario)> Listar()
+        public IEnumerable<(int Id, string Descricao, decimal Preco, string Usuario, string Status)> Listar()
         {
             var linhas = File.ReadAllLines(_caminhoArquivo);
             foreach (var linha in linhas)
             {
                 var partes = linha.Split(';');
-                if (partes.Length == 4 &&
+                if (partes.Length == 5 &&
                     int.TryParse(partes[0], out int id) &&
                     decimal.TryParse(partes[2], out decimal preco))
                 {
-                    yield return (id, partes[1], preco, partes[3]);
+                    yield return (id, partes[1], preco, partes[3], partes[4]);
                 }
             }
         }
 
-        public (int, string, decimal, string)? Obter(int id)
+        public (int, string, decimal, string, string)? Obter(int id)
         {
             return Listar().FirstOrDefault(p => p.Id == id);
         }
 
-        public (int, string, decimal, string) Adicionar(Bebida bebida, string usuario)
+        public (int, string, decimal, string, string) Adicionar(Bebida bebida, string usuario)
         {
             int novoId = 1;
             var produtos = Listar().ToList();
             if (produtos.Any())
                 novoId = produtos.Max(p => p.Id) + 1;
 
+            string status = "Pendente";
             using (var writer = File.AppendText(_caminhoArquivo))
             {
-                writer.WriteLine($"{novoId};{bebida.Descricao};{bebida.Preco};{usuario}");
+                writer.WriteLine($"{novoId};{bebida.Descricao};{bebida.Preco};{usuario};{status}");
             }
-            return (novoId, bebida.Descricao, bebida.Preco, usuario);
+            return (novoId, bebida.Descricao, bebida.Preco, usuario, status);
         }
 
         public bool Remover(int id)
@@ -60,7 +61,7 @@ namespace BackCaf.DAO
             if (produto == default) return false;
 
             produtos.Remove(produto);
-            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario}"));
+            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario};{p.Status}"));
             return true;
         }
 
@@ -71,8 +72,9 @@ namespace BackCaf.DAO
             if (index == -1) return false;
 
             var usuario = produtos[index].Usuario;
-            produtos[index] = (id, bebida.Descricao, bebida.Preco, usuario);
-            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario}"));
+            var status = produtos[index].Status;
+            produtos[index] = (id, bebida.Descricao, bebida.Preco, usuario, status);
+            File.WriteAllLines(_caminhoArquivo, produtos.Select(p => $"{p.Id};{p.Descricao};{p.Preco};{p.Usuario};{p.Status}"));
             return true;
         }
     }
