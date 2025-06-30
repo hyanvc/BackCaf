@@ -14,7 +14,7 @@ namespace BackCaf.BO
         // Lista todos os produtos persistidos
         public IEnumerable<ProdutoDTO> Listar()
         {
-            return _dao.Listar().Select(p => new ProdutoDTO
+            var lista = _dao.Listar().Select(p => new ProdutoDTO
             {
                 Id = p.Id,
                 Descricao = p.Descricao,
@@ -22,6 +22,9 @@ namespace BackCaf.BO
                 Usuario = p.Usuario,
                 Status = p.Status
             });
+
+            return lista;
+           
         }
 
         // Obtém um produto pelo ID
