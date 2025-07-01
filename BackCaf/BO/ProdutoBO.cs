@@ -24,7 +24,6 @@ namespace BackCaf.BO
             });
 
             return lista;
-           
         }
 
         // Obtém um produto pelo ID
@@ -44,9 +43,7 @@ namespace BackCaf.BO
 
         public (int, string, decimal, string, string) Criar(string tipo, bool leiteDeAveia, bool canela, bool semAcucar, string usuario)
         {
-            // Remove todos os pedidos anteriores do usuário
-            _dao.RemoverTodosDoUsuario(usuario);
-
+            // Não remove mais os pedidos anteriores do usuário!
             Bebida bebida = BebidaFactory.Criar(tipo);
             if (leiteDeAveia) bebida = new LeiteDeAveia(bebida);
             if (canela) bebida = new Canela(bebida);
