@@ -41,9 +41,28 @@ namespace BackCaf.BO
             };
         }
 
+        // Novo método: criar vários produtos em um pedido
+        public List<int> CriarPedido(List<ProdutoItemRequest> produtos, string usuario)
+        {
+            var ids = new List<int>();
+            foreach (var item in produtos)
+            {
+                for (int i = 0; i < item.Quantidade; i++)
+                {
+                    Bebida bebida = BebidaFactory.Criar(item.Tipo);
+                    if (item.LeiteDeAveia) bebida = new LeiteDeAveia(bebida);
+                    if (item.Canela) bebida = new Canela(bebida);
+                    if (item.SemAcucar) bebida = new SemAcucar(bebida);
+                    var result = _dao.Adicionar(bebida, usuario);
+                    ids.Add(result.Item1);
+                }
+            }
+            return ids;
+        }
+
+        // Mantido para compatibilidade, mas não remove mais pedidos antigos
         public (int, string, decimal, string, string) Criar(string tipo, bool leiteDeAveia, bool canela, bool semAcucar, string usuario)
         {
-            // Não remove mais os pedidos anteriores do usuário!
             Bebida bebida = BebidaFactory.Criar(tipo);
             if (leiteDeAveia) bebida = new LeiteDeAveia(bebida);
             if (canela) bebida = new Canela(bebida);

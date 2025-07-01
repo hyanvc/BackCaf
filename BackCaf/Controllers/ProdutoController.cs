@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using BackCaf.BO;
+using BackCaf.Models;
 
 namespace BackCaf.Controllers
 {
@@ -8,7 +10,6 @@ namespace BackCaf.Controllers
     public class ProdutoController : ControllerBase
     {
         private ProdutoBO _bo = new();
-
 
         [HttpGet]
         public IActionResult Get()
@@ -32,6 +33,14 @@ namespace BackCaf.Controllers
             var produto = _bo.Criar(req.Tipo, req.LeiteDeAveia, req.Canela, req.SemAcucar, req.Usuario);
             var idproduto = produto.Item1;
             return Ok(idproduto);
+        }
+
+        // Novo endpoint para criar vários produtos em um pedido
+        [HttpPost("varios")]
+        public IActionResult PostVarios([FromBody] PedidoRequest req)
+        {
+            var ids = _bo.CriarPedido(req.Produtos, req.Usuario);
+            return Ok(ids);
         }
 
         [HttpPut("{id}")]
@@ -64,11 +73,17 @@ namespace BackCaf.Controllers
         public bool LeiteDeAveia { get; set; }
         public bool Canela { get; set; }
         public bool SemAcucar { get; set; }
-        public string Usuario { get; set; } // Novo campo
+        public string Usuario { get; set; }
     }
 
     public class AtualizarStatusRequest
     {
         public string Status { get; set; }
+    }
+
+    public class PedidoRequest
+    {
+        public string Usuario { get; set; }
+        public List<ProdutoItemRequest> Produtos { get; set; }
     }
 }
