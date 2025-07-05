@@ -36,11 +36,43 @@ namespace BackCaf.Controllers
         }
 
         // Novo endpoint para criar vários produtos em um pedido
+        //USA ESSE AGORA COMO PADRAO DE CRIAÇÃO DE PRODUTOS : 
         [HttpPost("varios")]
         public IActionResult PostVarios([FromBody] PedidoRequest req)
         {
             var ids = _bo.CriarPedido(req.Produtos, req.Usuario);
             return Ok(ids);
+        }
+
+        [HttpPost("criarvarios")]
+        public IActionResult CriarVarios([FromBody] PedidoRequest req)
+        {
+            var pedidoId = _bo.CriarPedidoComProdutos(req.Usuario, req.Produtos);
+            return Ok(new { PedidoId = pedidoId });
+        }
+
+        [HttpGet("getvarios/{id}")]
+        public IActionResult GetVarios(int id)
+        {
+            var pedido = _bo.ObterPedido(id);
+            if (pedido == null) return NotFound();
+            return Ok(pedido);
+        }
+
+        [HttpGet("getvarios/usuario/{usuario}")]
+        public IActionResult GetVariosPorUsuario(string usuario)
+        {
+            if (string.IsNullOrWhiteSpace(usuario))
+                return BadRequest("Usuário é obrigatório.");
+
+            var pedidos = _bo.ListarPedidos()
+                .Where(p => p.Usuario != null && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (!pedidos.Any())
+                return NotFound("Nenhum pedido encontrado para este usuário.");
+
+            return Ok(pedidos);
         }
 
         [HttpPut("{id}")]

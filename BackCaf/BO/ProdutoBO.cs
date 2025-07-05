@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using BackCaf.DAO;
 using BackCaf.Models;
 using BackCaf.Factories;
@@ -96,5 +97,40 @@ namespace BackCaf.BO
         }
 
         public bool Remover(int id) => _dao.Remover(id);
+
+        public int CriarPedidoComProdutos(string usuario, List<ProdutoItemRequest> produtos)
+        {
+            // Monta lista de ProdutoPedidoDTO
+            var produtosPedido = new List<ProdutoPedidoDTO>();
+            foreach (var item in produtos)
+            {
+                Bebida bebida = BebidaFactory.Criar(item.Tipo);
+                if (item.LeiteDeAveia) bebida = new LeiteDeAveia(bebida);
+                if (item.Canela) bebida = new Canela(bebida);
+                if (item.SemAcucar) bebida = new SemAcucar(bebida);
+
+                produtosPedido.Add(new ProdutoPedidoDTO
+                {
+                    Tipo = item.Tipo,
+                    Descricao = bebida.Descricao,
+                    Preco = bebida.Preco,
+                    Quantidade = item.Quantidade,
+                    LeiteDeAveia = item.LeiteDeAveia,
+                    Canela = item.Canela,
+                    SemAcucar = item.SemAcucar
+                });
+            }
+            return _dao.AdicionarPedido(usuario, produtosPedido);
+        }
+
+        public PedidoDTO ObterPedido(int id)
+        {
+            return _dao.ObterPedido(id);
+        }
+
+        public IEnumerable<PedidoDTO> ListarPedidos()
+        {
+            return _dao.ListarPedidos();
+        }
     }
 }

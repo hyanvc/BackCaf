@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using BackCaf.Models;
 
 namespace BackCaf.DAO
@@ -13,11 +14,53 @@ namespace BackCaf.DAO
         public ProdutoDAO()
         {
             var pastaDownloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-            _caminhoArquivo = Path.Combine(pastaDownloads, "produtos.txt");
-
+            _caminhoArquivo = Path.Combine(pastaDownloads, "pedidos.txt");
             if (!File.Exists(_caminhoArquivo))
                 File.Create(_caminhoArquivo).Close();
-        }   
+        }
+
+        public int AdicionarPedido(string usuario, List<ProdutoPedidoDTO> produtos)
+        {
+            int novoId = 1;
+            var pedidos = ListarPedidos().ToList();
+            if (pedidos.Any())
+                novoId = pedidos.Max(p => p.Id) + 1;
+
+            var status = "Pendente";
+            var produtosJson = JsonSerializer.Serialize(produtos);
+
+            using (var writer = File.AppendText(_caminhoArquivo))
+            {
+                writer.WriteLine($"{novoId};{usuario};{status};{produtosJson}");
+            }
+            return novoId;
+        }
+
+        public PedidoDTO ObterPedido(int id)
+        {
+            return ListarPedidos().FirstOrDefault(p => p.Id == id);
+        }
+
+        public IEnumerable<PedidoDTO> ListarPedidos()
+        {
+            var linhas = File.ReadAllLines(_caminhoArquivo);
+            foreach (var linha in linhas)
+            {
+                var partes = linha.Split(';');
+                if (partes.Length == 4 &&
+                    int.TryParse(partes[0], out int id))
+                {
+                    var produtos = JsonSerializer.Deserialize<List<ProdutoPedidoDTO>>(partes[3]);
+                    yield return new PedidoDTO
+                    {
+                        Id = id,
+                        Usuario = partes[1],
+                        Status = partes[2],
+                        Produtos = produtos
+                    };
+                }
+            }
+        }
 
         public IEnumerable<(int Id, string Descricao, decimal Preco, string Usuario, string Status)> Listar()
         {
