@@ -25,7 +25,7 @@ namespace BackCaf.Controllers
             var historico = _bo.ListarPedidos()
                 .Where(p => p.Usuario != null && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(p => p.Id)
-                .ToList();
+                 .ToList();
 
             if (!historico.Any())
                 return NotFound("Nenhum pedido encontrado para este usuário.");

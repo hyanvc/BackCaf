@@ -66,16 +66,16 @@ namespace BackCaf.Controllers
         // --- NOVA ARQUITETURA: PEDIDOS ---
 
         // Cria vários produtos em um pedido (padrão)
+        //[HttpPost("Post")]
+        //public IActionResult Post([FromBody] PedidoRequest req)
+        //{
+        //    var ids = _bo.CriarPedido(req.Produtos, req.Usuario);
+        //    return Ok(ids);
+        //}
+
+        // Cria um pedido com vários produtos ou 1  (estrutura de pedido)
         [HttpPost("Post")]
         public IActionResult Post([FromBody] PedidoRequest req)
-        {
-            var ids = _bo.CriarPedido(req.Produtos, req.Usuario);
-            return Ok(ids);
-        }
-
-        // Cria um pedido com vários produtos (estrutura de pedido)
-        [HttpPost("PostVarios")]
-        public IActionResult PostVarios([FromBody] PedidoRequest req)
         {
             var pedidoId = _bo.CriarPedidoComProdutos(req.Usuario, req.Produtos);
             return Ok(new { PedidoId = pedidoId });

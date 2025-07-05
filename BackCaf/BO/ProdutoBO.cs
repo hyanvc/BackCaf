@@ -120,7 +120,14 @@ namespace BackCaf.BO
                     SemAcucar = item.SemAcucar
                 });
             }
-            return _dao.AdicionarPedido(usuario, produtosPedido);
+            var pedidoId = _dao.AdicionarPedido(usuario, produtosPedido);
+
+            // Notifica o usuário que o pedido está pendente
+            _notificacaoArquivoObserver.Notificar(
+                $"Seu pedido #{pedidoId} está Pendente.", usuario
+            );
+
+            return pedidoId;
         }
 
         public PedidoDTO ObterPedido(int id)
