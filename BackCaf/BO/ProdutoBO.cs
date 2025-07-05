@@ -132,5 +132,43 @@ namespace BackCaf.BO
         {
             return _dao.ListarPedidos();
         }
+
+        // Atualiza todos os produtos de um pedido
+        public bool AtualizarPedido(int pedidoId, List<ProdutoItemRequest> produtos)
+        {
+            // Monta lista de ProdutoPedidoDTO
+            var produtosPedido = new List<ProdutoPedidoDTO>();
+            foreach (var item in produtos)
+            {
+                Bebida bebida = BebidaFactory.Criar(item.Tipo);
+                if (item.LeiteDeAveia) bebida = new LeiteDeAveia(bebida);
+                if (item.Canela) bebida = new Canela(bebida);
+                if (item.SemAcucar) bebida = new SemAcucar(bebida);
+
+                produtosPedido.Add(new ProdutoPedidoDTO
+                {
+                    Tipo = item.Tipo,
+                    Descricao = bebida.Descricao,
+                    Preco = bebida.Preco,
+                    Quantidade = item.Quantidade,
+                    LeiteDeAveia = item.LeiteDeAveia,
+                    Canela = item.Canela,
+                    SemAcucar = item.SemAcucar
+                });
+            }
+            return _dao.AtualizarPedido(pedidoId, produtosPedido);
+        }
+
+        // Remove um pedido inteiro
+        public bool RemoverPedido(int pedidoId)
+        {
+            return _dao.RemoverPedido(pedidoId);
+        }
+
+        // Atualiza o status do pedido
+        public bool AtualizarStatusPedido(int pedidoId, string novoStatus)
+        {
+            return _dao.AtualizarStatusPedido(pedidoId, novoStatus);
+        }
     }
 }

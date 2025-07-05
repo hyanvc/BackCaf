@@ -62,6 +62,64 @@ namespace BackCaf.DAO
             }
         }
 
+        public bool AtualizarPedido(int pedidoId, List<ProdutoPedidoDTO> novosProdutos)
+        {
+            var pedidos = ListarPedidos().ToList();
+            var index = pedidos.FindIndex(p => p.Id == pedidoId);
+            if (index == -1) return false;
+
+            var pedido = pedidos[index];
+            pedidos[index] = new PedidoDTO
+            {
+                Id = pedido.Id,
+                Usuario = pedido.Usuario,
+                Status = pedido.Status,
+                Produtos = novosProdutos
+            };
+
+            SalvarTodosPedidos(pedidos);
+            return true;
+        }
+
+        public bool RemoverPedido(int pedidoId)
+        {
+            var pedidos = ListarPedidos().ToList();
+            var pedido = pedidos.FirstOrDefault(p => p.Id == pedidoId);
+            if (pedido == null) return false;
+
+            pedidos.Remove(pedido);
+            SalvarTodosPedidos(pedidos);
+            return true;
+        }
+
+        public bool AtualizarStatusPedido(int pedidoId, string novoStatus)
+        {
+            var pedidos = ListarPedidos().ToList();
+            var index = pedidos.FindIndex(p => p.Id == pedidoId);
+            if (index == -1) return false;
+
+            var pedido = pedidos[index];
+            pedidos[index] = new PedidoDTO
+            {
+                Id = pedido.Id,
+                Usuario = pedido.Usuario,
+                Status = novoStatus,
+                Produtos = pedido.Produtos
+            };
+
+            SalvarTodosPedidos(pedidos);
+            return true;
+        }
+
+        // Utilitário para sobrescrever o arquivo de pedidos
+        private void SalvarTodosPedidos(List<PedidoDTO> pedidos)
+        {
+            var linhas = pedidos.Select(p =>
+                $"{p.Id};{p.Usuario};{p.Status};{JsonSerializer.Serialize(p.Produtos)}"
+            );
+            File.WriteAllLines(_caminhoArquivo, linhas);
+        }
+
         public IEnumerable<(int Id, string Descricao, decimal Preco, string Usuario, string Status)> Listar()
         {
             var linhas = File.ReadAllLines(_caminhoArquivo);

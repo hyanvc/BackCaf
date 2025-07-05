@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using BackCaf.BO;
 using BackCaf.Models;
 
@@ -11,6 +12,8 @@ namespace BackCaf.Controllers
     {
         private ProdutoBO _bo = new();
 
+        // --- MÉTODOS ANTIGOS (produtos individuais) ---
+        /*
         [HttpGet]
         public IActionResult Get()
         {
@@ -35,46 +38,6 @@ namespace BackCaf.Controllers
             return Ok(idproduto);
         }
 
-        // Novo endpoint para criar vários produtos em um pedido
-        //USA ESSE AGORA COMO PADRAO DE CRIAÇÃO DE PRODUTOS : 
-        [HttpPost("varios")]
-        public IActionResult PostVarios([FromBody] PedidoRequest req)
-        {
-            var ids = _bo.CriarPedido(req.Produtos, req.Usuario);
-            return Ok(ids);
-        }
-
-        [HttpPost("criarvarios")]
-        public IActionResult CriarVarios([FromBody] PedidoRequest req)
-        {
-            var pedidoId = _bo.CriarPedidoComProdutos(req.Usuario, req.Produtos);
-            return Ok(new { PedidoId = pedidoId });
-        }
-
-        [HttpGet("getvarios/{id}")]
-        public IActionResult GetVarios(int id)
-        {
-            var pedido = _bo.ObterPedido(id);
-            if (pedido == null) return NotFound();
-            return Ok(pedido);
-        }
-
-        [HttpGet("getvarios/usuario/{usuario}")]
-        public IActionResult GetVariosPorUsuario(string usuario)
-        {
-            if (string.IsNullOrWhiteSpace(usuario))
-                return BadRequest("Usuário é obrigatório.");
-
-            var pedidos = _bo.ListarPedidos()
-                .Where(p => p.Usuario != null && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (!pedidos.Any())
-                return NotFound("Nenhum pedido encontrado para este usuário.");
-
-            return Ok(pedidos);
-        }
-
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ProdutoRequest req)
         {
@@ -95,6 +58,97 @@ namespace BackCaf.Controllers
         public IActionResult Delete(int id)
         {
             if (!_bo.Remover(id)) return NotFound();
+            return NoContent();
+        }
+        */
+        // --- FIM DOS MÉTODOS ANTIGOS ---
+
+        // --- NOVA ARQUITETURA: PEDIDOS ---
+
+        // Cria vários produtos em um pedido (padrão)
+        [HttpPost("Post")]
+        public IActionResult Post([FromBody] PedidoRequest req)
+        {
+            var ids = _bo.CriarPedido(req.Produtos, req.Usuario);
+            return Ok(ids);
+        }
+
+        // Cria um pedido com vários produtos (estrutura de pedido)
+        [HttpPost("PostVarios")]
+        public IActionResult PostVarios([FromBody] PedidoRequest req)
+        {
+            var pedidoId = _bo.CriarPedidoComProdutos(req.Usuario, req.Produtos);
+            return Ok(new { PedidoId = pedidoId });
+        }
+
+        // Consulta um pedido por ID
+        [HttpGet("get/{id}")]
+        public IActionResult Get(int id)
+        {
+            var pedido = _bo.ObterPedido(id);
+            if (pedido == null) return NotFound();
+            return Ok(pedido);
+        }
+
+        // Consulta todos os pedidos de um usuário
+        [HttpGet("Get/usuario/{usuario}")]
+        public IActionResult GetPorUsuario(string usuario)
+        {
+            if (string.IsNullOrWhiteSpace(usuario))
+                return BadRequest("Usuário é obrigatório.");
+
+            var pedidos = _bo.ListarPedidos()
+                .Where(p => p.Usuario != null && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (!pedidos.Any())
+                return NotFound("Nenhum pedido encontrado para este usuário.");
+
+            return Ok(pedidos);
+        }
+
+        // Atualiza todos os produtos de um pedido
+        [HttpPut("pedido/{id}")]
+        public IActionResult AtualizarPedido(int id, [FromBody] PedidoRequest req)
+        {
+            var pedido = _bo.ObterPedido(id);
+            if (pedido == null)
+                return NotFound("Pedido não encontrado.");
+
+            bool atualizado = _bo.AtualizarPedido(id, req.Produtos);
+            if (!atualizado)
+                return BadRequest("Não foi possível atualizar o pedido.");
+
+            return NoContent();
+        }
+
+        // Remove um pedido inteiro (com todos os produtos)
+        [HttpDelete("pedido/{id}")]
+        public IActionResult DeletePedido(int id)
+        {
+            var pedido = _bo.ObterPedido(id);
+            if (pedido == null)
+                return NotFound("Pedido não encontrado.");
+
+            bool removido = _bo.RemoverPedido(id);
+            if (!removido)
+                return BadRequest("Não foi possível remover o pedido.");
+
+            return NoContent();
+        }
+
+        // Atualiza o status do pedido
+        [HttpPut("pedido/{id}/status")]
+        public IActionResult AtualizarStatusPedido(int id, [FromBody] AtualizarStatusRequest req)
+        {
+            var pedido = _bo.ObterPedido(id);
+            if (pedido == null)
+                return NotFound("Pedido não encontrado.");
+
+            bool atualizado = _bo.AtualizarStatusPedido(id, req.Status);
+            if (!atualizado)
+                return BadRequest("Não foi possível atualizar o status do pedido.");
+
             return NoContent();
         }
     }
