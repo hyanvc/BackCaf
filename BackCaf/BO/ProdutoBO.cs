@@ -168,7 +168,19 @@ namespace BackCaf.BO
         // Atualiza o status do pedido
         public bool AtualizarStatusPedido(int pedidoId, string novoStatus)
         {
-            return _dao.AtualizarStatusPedido(pedidoId, novoStatus);
+            var pedido = _dao.ObterPedido(pedidoId);
+            if (pedido == null)
+                return false;
+
+            var atualizado = _dao.AtualizarStatusPedido(pedidoId, novoStatus);
+            if (atualizado)
+            {
+                // Notifica o usuário via Observer (arquivo)
+                _notificacaoArquivoObserver.Notificar(
+                    $"Status do pedido #{pedidoId} alterado para '{novoStatus}'", pedido.Usuario
+                );
+            }
+            return atualizado;
         }
     }
 }

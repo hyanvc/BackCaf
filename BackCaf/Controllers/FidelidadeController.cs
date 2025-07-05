@@ -19,7 +19,7 @@ namespace BackCaf.Controllers
             if (string.IsNullOrWhiteSpace(usuario))
                 return BadRequest("Usuário é obrigatório.");
 
-            var concluidos = _bo.Listar()
+            var concluidos = _bo.ListarPedidos()
                 .Where(p => p.Usuario != null
                             && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase)
                             && p.Status != null

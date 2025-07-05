@@ -26,5 +26,26 @@ namespace BackCaf.Controllers
 
             return Ok(notificacoes);
         }
+
+
+
+        [HttpDelete("{usuario}")]
+        public IActionResult DeleteAll(string usuario)
+        {
+            var pastaDownloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            var caminhoArquivo = Path.Combine(pastaDownloads, "notificacoes.txt");
+
+            if (string.IsNullOrWhiteSpace(usuario))
+                return BadRequest("Usuário é obrigatório.");
+
+            var todas = System.IO.File.ReadAllLines(caminhoArquivo).ToList();
+            var restantes = todas.Where(linha =>
+                linha.Split(';').Length < 2 ||
+                !linha.Split(';')[1].Equals(usuario, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+
+            System.IO.File.WriteAllLines(caminhoArquivo, restantes);
+            return NoContent();
+        }
     }
 }

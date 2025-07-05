@@ -21,7 +21,8 @@ namespace BackCaf.Controllers
             if (string.IsNullOrWhiteSpace(usuario))
                 return BadRequest("Usuário é obrigatório.");
 
-            var historico = _bo.Listar()
+            // Usa a nova arquitetura de pedidos
+            var historico = _bo.ListarPedidos()
                 .Where(p => p.Usuario != null && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(p => p.Id)
                 .ToList();
