@@ -4,6 +4,7 @@ using System.Text.Json;
 using BackCaf.DAO;
 using BackCaf.Models;
 using BackCaf.Factories;
+using BackCaf.Strategies;
 
 namespace BackCaf.BO
 {
@@ -98,9 +99,40 @@ namespace BackCaf.BO
 
         public bool Remover(int id) => _dao.Remover(id);
 
-        public int CriarPedidoComProdutos(string usuario, List<ProdutoItemRequest> produtos)
+        //public int CriarPedidoComProdutos(string usuario, List<ProdutoItemRequest> produtos)
+        //{
+        //    // Monta lista de ProdutoPedidoDTO
+        //    var produtosPedido = new List<ProdutoPedidoDTO>();
+        //    foreach (var item in produtos)
+        //    {
+        //        Bebida bebida = BebidaFactory.Criar(item.Tipo);
+        //        if (item.LeiteDeAveia) bebida = new LeiteDeAveia(bebida);
+        //        if (item.Canela) bebida = new Canela(bebida);
+        //        if (item.SemAcucar) bebida = new SemAcucar(bebida);
+
+        //        produtosPedido.Add(new ProdutoPedidoDTO
+        //        {
+        //            Tipo = item.Tipo,
+        //            Descricao = bebida.Descricao,
+        //            Preco = bebida.Preco,
+        //            Quantidade = item.Quantidade,
+        //            LeiteDeAveia = item.LeiteDeAveia,
+        //            Canela = item.Canela,
+        //            SemAcucar = item.SemAcucar
+        //        });
+        //    }
+        //    var pedidoId = _dao.AdicionarPedido(usuario, produtosPedido);
+
+        //    // Notifica o usuário que o pedido está pendente
+        //    _notificacaoArquivoObserver.Notificar(
+        //        $"Seu pedido #{pedidoId} está Pendente.", usuario
+        //    );
+
+        //    return pedidoId;
+        //}
+
+        public int CriarPedidoComProdutos(string usuario, List<ProdutoItemRequest> produtos, string tipoPagamento = null)
         {
-            // Monta lista de ProdutoPedidoDTO
             var produtosPedido = new List<ProdutoPedidoDTO>();
             foreach (var item in produtos)
             {
@@ -120,9 +152,11 @@ namespace BackCaf.BO
                     SemAcucar = item.SemAcucar
                 });
             }
-            var pedidoId = _dao.AdicionarPedido(usuario, produtosPedido);
 
-            // Notifica o usuário que o pedido está pendente
+            // Armazena o tipo de pagamento
+            string tipoPgto = string.IsNullOrWhiteSpace(tipoPagamento) ? "semDesconto" : tipoPagamento.ToLower();
+            var pedidoId = _dao.AdicionarPedido(usuario, produtosPedido, tipoPgto);
+
             _notificacaoArquivoObserver.Notificar(
                 $"Seu pedido #{pedidoId} está Pendente.", usuario
             );

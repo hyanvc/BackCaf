@@ -8,7 +8,8 @@ namespace BackCaf.Models
         public string Usuario { get; set; }
         public string Status { get; set; }
         public List<ProdutoPedidoDTO> Produtos { get; set; }
-    }
+        public string TipoPagamento { get; set; } // Novo campo
+    }   
 
     public class ProdutoPedidoDTO
     {

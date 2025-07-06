@@ -78,7 +78,9 @@ namespace BackCaf.Controllers
         [HttpPost("Post")]
         public IActionResult Post([FromBody] PedidoRequest req)
         {
-            var pedidoId = _bo.CriarPedidoComProdutos(req.Usuario, req.Produtos);
+            // Apenas referencia o campo novo do request
+            var tipoPagamento = req.TipoPagamento;
+            var pedidoId = _bo.CriarPedidoComProdutos(req.Usuario, req.Produtos, tipoPagamento);
             return Ok(new { PedidoId = pedidoId });
         }
 
@@ -93,7 +95,9 @@ namespace BackCaf.Controllers
                     p.Usuario,
                     p.Status,
                     Produtos = p.Produtos,
-                    Preco = p.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m
+                    Preco = p.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m,
+                    TipoPagamento = p.TipoPagamento
+
                 })
                 .ToList();
 
@@ -116,7 +120,9 @@ namespace BackCaf.Controllers
                 pedido.Usuario,
                 pedido.Status,
                 Produtos = pedido.Produtos,
-                Preco = pedido.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m
+                Preco = pedido.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m,
+                TipoPagamento = pedido.TipoPagamento 
+
             });
         }
 
@@ -135,7 +141,8 @@ namespace BackCaf.Controllers
                     p.Usuario,
                     p.Status,
                     Produtos = p.Produtos,
-                    Preco = p.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m
+                    Preco = p.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m,
+                    TipoPagamento = p.TipoPagamento 
                 })
                 .ToList();
 
@@ -209,5 +216,6 @@ namespace BackCaf.Controllers
     {
         public string Usuario { get; set; }
         public List<ProdutoItemRequest> Produtos { get; set; }
+        public string TipoPagamento { get; set; } // Adicionando o campo TipoPagamento
     }
 }

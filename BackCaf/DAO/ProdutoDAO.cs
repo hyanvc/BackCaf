@@ -19,7 +19,7 @@ namespace BackCaf.DAO
                 File.Create(_caminhoArquivo).Close();
         }
 
-        public int AdicionarPedido(string usuario, List<ProdutoPedidoDTO> produtos)
+        public int AdicionarPedido(string usuario, List<ProdutoPedidoDTO> produtos, string tipoPagamento)
         {
             int novoId = 1;
             var pedidos = ListarPedidos().ToList();
@@ -31,7 +31,7 @@ namespace BackCaf.DAO
 
             using (var writer = File.AppendText(_caminhoArquivo))
             {
-                writer.WriteLine($"{novoId};{usuario};{status};{produtosJson}");
+                writer.WriteLine($"{novoId};{usuario};{status};{produtosJson};{tipoPagamento}");
             }
             return novoId;
         }
@@ -47,7 +47,7 @@ namespace BackCaf.DAO
             foreach (var linha in linhas)
             {
                 var partes = linha.Split(';');
-                if (partes.Length == 4 &&
+                if (partes.Length >= 5 &&
                     int.TryParse(partes[0], out int id))
                 {
                     var produtos = JsonSerializer.Deserialize<List<ProdutoPedidoDTO>>(partes[3]);
@@ -56,7 +56,8 @@ namespace BackCaf.DAO
                         Id = id,
                         Usuario = partes[1],
                         Status = partes[2],
-                        Produtos = produtos
+                        Produtos = produtos,
+                        TipoPagamento = partes[4]
                     };
                 }
             }
@@ -74,7 +75,8 @@ namespace BackCaf.DAO
                 Id = pedido.Id,
                 Usuario = pedido.Usuario,
                 Status = pedido.Status,
-                Produtos = novosProdutos
+                Produtos = novosProdutos,
+                TipoPagamento = pedido.TipoPagamento
             };
 
             SalvarTodosPedidos(pedidos);
@@ -104,18 +106,18 @@ namespace BackCaf.DAO
                 Id = pedido.Id,
                 Usuario = pedido.Usuario,
                 Status = novoStatus,
-                Produtos = pedido.Produtos
+                Produtos = pedido.Produtos,
+                TipoPagamento = pedido.TipoPagamento
             };
 
             SalvarTodosPedidos(pedidos);
             return true;
         }
 
-        // Utilitário para sobrescrever o arquivo de pedidos
         private void SalvarTodosPedidos(List<PedidoDTO> pedidos)
         {
             var linhas = pedidos.Select(p =>
-                $"{p.Id};{p.Usuario};{p.Status};{JsonSerializer.Serialize(p.Produtos)}"
+                $"{p.Id};{p.Usuario};{p.Status};{JsonSerializer.Serialize(p.Produtos)};{p.TipoPagamento}"
             );
             File.WriteAllLines(_caminhoArquivo, linhas);
         }
