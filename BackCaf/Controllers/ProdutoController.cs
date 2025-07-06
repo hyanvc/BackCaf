@@ -11,6 +11,7 @@ namespace BackCaf.Controllers
     public class ProdutoController : ControllerBase
     {
         private ProdutoBO _bo = new();
+        private readonly INotificationObserver _notificacaoArquivoObserver = new NotificacaoArquivoObserver();
 
         // --- MÉTODOS ANTIGOS (produtos individuais) ---
         /*
@@ -81,13 +82,42 @@ namespace BackCaf.Controllers
             return Ok(new { PedidoId = pedidoId });
         }
 
+        // GET: /api/produto/pedidos
+        [HttpGet("pedidos")]
+        public IActionResult GetPedidos()
+        {
+            var pedidos = _bo.ListarPedidos()
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Usuario,
+                    p.Status,
+                    Produtos = p.Produtos,
+                    Preco = p.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m
+                })
+                .ToList();
+
+            if (!pedidos.Any())
+                return NotFound("Nenhum pedido encontrado.");
+
+            return Ok(pedidos);
+        }
+
         // Consulta um pedido por ID
         [HttpGet("get/{id}")]
         public IActionResult Get(int id)
         {
             var pedido = _bo.ObterPedido(id);
             if (pedido == null) return NotFound();
-            return Ok(pedido);
+
+            return Ok(new
+            {
+                pedido.Id,
+                pedido.Usuario,
+                pedido.Status,
+                Produtos = pedido.Produtos,
+                Preco = pedido.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m
+            });
         }
 
         // Consulta todos os pedidos de um usuário
@@ -99,6 +129,14 @@ namespace BackCaf.Controllers
 
             var pedidos = _bo.ListarPedidos()
                 .Where(p => p.Usuario != null && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase))
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Usuario,
+                    p.Status,
+                    Produtos = p.Produtos,
+                    Preco = p.Produtos?.Sum(prod => prod.Preco * prod.Quantidade) ?? 0m
+                })
                 .ToList();
 
             if (!pedidos.Any())
