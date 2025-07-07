@@ -23,7 +23,7 @@ namespace BackCaf.Controllers
                 .Where(p => p.Usuario != null
                             && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase)
                             && p.Status != null
-                            && p.Status.Equals("Concluido", System.StringComparison.OrdinalIgnoreCase))
+                            && p.Status.Equals("Entregue", System.StringComparison.OrdinalIgnoreCase))
                 .Count();
 
             int recompensas = concluidos / 2;
@@ -52,7 +52,7 @@ namespace BackCaf.Controllers
                 .Where(p => p.Usuario != null
                             && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase)
                             && p.Status != null
-                            && p.Status.Equals("Concluido", System.StringComparison.OrdinalIgnoreCase))
+                            && p.Status.Equals("Entregue", System.StringComparison.OrdinalIgnoreCase))
                 .OrderBy(p => p.Id)
                 .ToList();
 
