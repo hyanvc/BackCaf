@@ -45,10 +45,10 @@ namespace BackCaf.Controllers
         public IActionResult ConsumirFidelidade(string usuario)
         {
             if (string.IsNullOrWhiteSpace(usuario))
-                return BadRequest("Usuário é obrigatório.");
+                return BadRequest("Usuário é obrigatório.");    
 
-            // Busca todos os pedidos concluídos do usuário
-            var concluidos = _bo.Listar()
+            // Busca todos os pedidos concluídos do usuário (nova arquitetura)
+            var concluidos = _bo.ListarPedidos()
                 .Where(p => p.Usuario != null
                             && p.Usuario.Equals(usuario, System.StringComparison.OrdinalIgnoreCase)
                             && p.Status != null
@@ -60,11 +60,11 @@ namespace BackCaf.Controllers
             if (recompensas < 1)
                 return BadRequest("Usuário não possui recompensas disponíveis para consumir.");
 
-            // Marca os dois pedidos mais antigos como "ConsumidoFidelidade"
+            // Marca os dois pedidos mais antigos como "ConsumidoFidelidade" (nova arquitetura)
             var pedidosParaConsumir = concluidos.Take(2).ToList();
             foreach (var pedido in pedidosParaConsumir)
             {
-                _bo.AtualizarStatus(pedido.Id, "ConsumidoFidelidade");
+                _bo.AtualizarStatusPedido(pedido.Id, "ConsumidoFidelidade");
             }
 
             return Ok(new
